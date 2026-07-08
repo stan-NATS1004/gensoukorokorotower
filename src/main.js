@@ -346,6 +346,9 @@ canvas.addEventListener(
 canvas.addEventListener(
   "pointercancel",
   () => {
+    // スマホの画面端スワイプ等でポインタがキャンセルされても、
+    // 直前に狙った位置へそのまま落とす（右端タップが無効化される問題対策）。
+    if (pointerActive) dropBall();
     pointerActive = false;
   },
   listenerOpts
