@@ -34,8 +34,8 @@ export const PHYSICS = {
 export const RULES = {
   dropCooldownMs: 800, // 落下後、次の球を落とせない時間
   maxBalls: 80, // 球数上限
-  judgeDelayMs: 1500, // 落下後この時間は判定対象にしない
-  gameOverGraceMs: 2000, // ラインを超え続けたらゲームオーバーになるまでの猶予
+  judgeDelayMs: 1500, // 落下後この時間は判定対象にしない（落下中の即終了を防ぐ）
+  gameOverGraceMs: 0, // ラインを超えたら即終了（猶予なし）
   outOfBoundsY: -5, // これより下に落ちた球は除去
 };
 
