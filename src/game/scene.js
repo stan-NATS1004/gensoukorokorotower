@@ -20,9 +20,13 @@ export function createScene(canvas) {
   // 表示したい縦範囲（床の少し下〜出現位置の少し上）を基準に frustum を決める。
   const viewTop = STAGE.spawnY + 0.6;
   const viewBottom = STAGE.floorY - 0.8;
+  const midY = (viewTop + viewBottom) / 2;
+  // 斜め見下ろし用の frustum 高さ（傾けた分、奥行きが縦に映るので少し広げる）
+  const frustumHeight = (viewTop - viewBottom) * 1.18;
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
-  camera.position.set(0, (viewTop + viewBottom) / 2, 12);
-  camera.lookAt(0, (viewTop + viewBottom) / 2, 0);
+  // x軸まわりにだけ傾けることで、左右(x)は画面横方向のまま＝クリック位置の対応が崩れない
+  camera.position.set(0, midY + 5.4, 11);
+  camera.lookAt(0, midY - 0.6, 0);
 
   // --- ライト ---
   const ambient = new THREE.AmbientLight(0xffffff, 0.75);
@@ -108,19 +112,18 @@ export function createScene(canvas) {
     guide,
     viewTop,
     viewBottom,
-    resize: () => resize(renderer, camera, canvas, viewTop, viewBottom),
+    resize: () => resize(renderer, camera, canvas, frustumHeight),
   };
 }
 
 // キャンバスのアスペクト比に合わせて Orthographic frustum を更新する。
-function resize(renderer, camera, canvas, viewTop, viewBottom) {
+function resize(renderer, camera, canvas, frustumHeight) {
   const w = canvas.clientWidth || 1;
   const h = canvas.clientHeight || 1;
   renderer.setSize(w, h, false);
 
-  const viewHeight = viewTop - viewBottom;
   const aspect = w / h;
-  const halfH = viewHeight / 2;
+  const halfH = frustumHeight / 2;
   const halfW = halfH * aspect;
 
   camera.top = halfH;

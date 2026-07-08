@@ -20,13 +20,17 @@ export const PHYSICS = {
   fixedTimeStep: 1 / 60,
   maxSubSteps: 3,
   sphereMass: 1,
-  sphereRestitution: 0.15,
-  sphereFriction: 0.7,
-  floorFriction: 0.8,
-  wallFriction: 0.5,
-  linearDamping: 0.15,
-  angularDamping: 0.2,
+  // 転がって片側に崩れないよう、安定寄りに調整（跳ねにくく・転がりにくく）
+  sphereRestitution: 0.08,
+  sphereFriction: 0.95,
+  floorFriction: 1.0,
+  wallFriction: 0.6,
+  linearDamping: 0.25,
+  angularDamping: 0.55,
 };
+
+// 落下時に奥行き方向へ少しばらつかせて立体的な山にする（±値）
+export const SPAWN_Z_JITTER = 0.32;
 
 export const RULES = {
   dropCooldownMs: 800, // 落下後、次の球を落とせない時間

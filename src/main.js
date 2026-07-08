@@ -1,6 +1,13 @@
 import "./style.css";
 import * as THREE from "three";
-import { STAGE, PHYSICS, RULES, getRank, STORAGE_KEYS } from "./game/config.js";
+import {
+  STAGE,
+  PHYSICS,
+  RULES,
+  SPAWN_Z_JITTER,
+  getRank,
+  STORAGE_KEYS,
+} from "./game/config.js";
 import { createScene } from "./game/scene.js";
 import { createPhysics, createSphereBody } from "./game/physics.js";
 import { createBallMesh } from "./game/ball.js";
@@ -47,10 +54,12 @@ function prepareWaitingBall() {
 
   const group = createBallMesh(character);
   const x = 0;
-  group.position.set(x, STAGE.spawnY, 0);
+  // 奥行き方向に少しばらつかせて立体的な山にする
+  const z = (Math.random() * 2 - 1) * SPAWN_Z_JITTER;
+  group.position.set(x, STAGE.spawnY, z);
   view.scene.add(group);
 
-  game.waitingBall = { group, character, x };
+  game.waitingBall = { group, character, x, z };
   updateGuide(x);
   ui.setNextPreview(game.nextCharacter.color);
 }
@@ -93,14 +102,14 @@ function dropBall() {
     return;
   }
 
-  const { group, character, x } = game.waitingBall;
+  const { group, character, x, z } = game.waitingBall;
   const body = createSphereBody(
     physics.sphereMat,
     character.radius,
     character.mass,
     x,
     STAGE.spawnY,
-    0
+    z
   );
   physics.world.addBody(body);
 
