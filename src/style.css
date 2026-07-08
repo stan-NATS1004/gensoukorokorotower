@@ -2,7 +2,6 @@
   /* 9:16 のゲーム枠。PCでは最大幅430px */
   --frame-max-width: 430px;
   --hud-top-h: 84px;
-  --hud-bottom-h: 116px;
   --accent: #ff8fb1;
   --accent-dark: #e85d8a;
   --sky-top: #bfe9ff;
@@ -120,6 +119,39 @@ body {
   width: 100%;
   height: 100%;
   touch-action: none;
+  cursor: pointer;
+}
+
+/* ===== 操作ヒント ===== */
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #5a6b7b;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  z-index: 4;
+  animation: hintPulse 1.6s ease-in-out infinite;
+}
+
+.hint.hidden {
+  display: none;
+}
+
+@keyframes hintPulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ===== オーバーレイ ===== */
@@ -254,57 +286,9 @@ body {
   box-shadow: 0 2px 0 #c94b76;
 }
 
-/* ===== 下部HUD ===== */
-#hud-bottom {
-  flex: 0 0 auto;
-  height: var(--hud-bottom-h);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 14px);
-  z-index: 5;
-}
-
-.btn-move {
-  flex: 0 0 auto;
-  width: 72px;
-  height: 72px;
-  font-size: 28px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #8fd3ff, #4aa8e8);
-  box-shadow: 0 4px 0 #3488c4;
-}
-
-.btn-move:active {
-  box-shadow: 0 2px 0 #3488c4;
-}
-
-.btn-drop {
-  flex: 1 1 auto;
-  max-width: 180px;
-  height: 72px;
-  font-size: 22px;
-  letter-spacing: 0.08em;
-  background: linear-gradient(180deg, #ffd36b, #ff9f2e);
-  box-shadow: 0 4px 0 #e07f18;
-}
-
-.btn-drop:active {
-  box-shadow: 0 2px 0 #e07f18;
-}
-
 /* 高さが低い端末向けの微調整 */
 @media (max-height: 640px) {
   :root {
     --hud-top-h: 74px;
-    --hud-bottom-h: 100px;
-  }
-  .btn-move {
-    width: 62px;
-    height: 62px;
-  }
-  .btn-drop {
-    height: 62px;
   }
 }

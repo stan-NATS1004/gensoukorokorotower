@@ -59,17 +59,27 @@ function updateGuide(x) {
   view.guide.position.x = x;
 }
 
-// ===== 待機球の左右移動 =====
+// ===== 待機球の左右移動（キーボード用） =====
 function moveWaiting(dir) {
   if (game.state !== State.PLAYING || !game.waitingBall) return;
-  const nx = clamp(
-    game.waitingBall.x + dir * STAGE.moveStep,
-    STAGE.moveMinX,
-    STAGE.moveMaxX
-  );
+  aimTo(game.waitingBall.x + dir * STAGE.moveStep);
+}
+
+// 待機球を指定x（ワールド座標）に合わせる
+function aimTo(worldX) {
+  if (game.state !== State.PLAYING || !game.waitingBall) return;
+  const nx = clamp(worldX, STAGE.moveMinX, STAGE.moveMaxX);
   game.waitingBall.x = nx;
   game.waitingBall.group.position.x = nx;
   updateGuide(nx);
+}
+
+// 画面上のx座標をワールドx座標へ変換する
+function clientXToWorldX(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  const frac = (clientX - rect.left) / rect.width;
+  const worldWidth = view.camera.right - view.camera.left;
+  return view.camera.left + frac * worldWidth;
 }
 
 // ===== 落下 =====
@@ -107,15 +117,14 @@ function dropBall() {
   // スコア = 落とした球の個数
   game.score += 1;
   ui.setScore(game.score);
+  ui.hideHint();
 
   // クールダウン後に次の球を準備
   game.canDrop = false;
-  ui.setDropEnabled(false);
   setTimeout(() => {
     if (game.state !== State.PLAYING) return;
     prepareWaitingBall();
     game.canDrop = true;
-    ui.setDropEnabled(true);
   }, RULES.dropCooldownMs);
 }
 
@@ -181,7 +190,7 @@ function triggerGameOver() {
   if (game.state !== State.PLAYING) return;
   game.state = State.GAMEOVER;
   game.canDrop = false;
-  ui.setControlsEnabled(false);
+  ui.hideHint();
 
   // 待機球を消す
   if (game.waitingBall) {
@@ -216,8 +225,7 @@ function startGame() {
   ui.setScore(0);
   ui.hideStart();
   ui.hideGameOver();
-  ui.setControlsEnabled(true);
-  ui.setDropEnabled(true);
+  ui.showHint();
   prepareWaitingBall();
 }
 
@@ -241,36 +249,36 @@ function saveResult(score, highScore, rank) {
   }
 }
 
-// ===== 入力（ボタン） =====
-function bindHold(btn, fn) {
-  let timer = null;
-  const start = (e) => {
-    e.preventDefault();
-    fn();
-    // 長押しで連続移動
-    timer = setTimeout(function repeat() {
-      fn();
-      timer = setTimeout(repeat, 90);
-    }, 260);
-  };
-  const stop = () => {
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
-  };
-  btn.addEventListener("pointerdown", start);
-  btn.addEventListener("pointerup", stop);
-  btn.addEventListener("pointerleave", stop);
-  btn.addEventListener("pointercancel", stop);
-}
+// ===== 入力（画面クリック / タップ） =====
+// 画面上でポインタを動かすと待機球が横に移動し、
+// クリック / タップで球を落とす（PC・スマホ共通）。
+let pointerActive = false;
 
-bindHold(ui.el.leftBtn, () => moveWaiting(-1));
-bindHold(ui.el.rightBtn, () => moveWaiting(1));
-
-ui.el.dropBtn.addEventListener("pointerdown", (e) => {
+canvas.addEventListener("pointerdown", (e) => {
   e.preventDefault();
-  dropBall();
+  pointerActive = true;
+  aimTo(clientXToWorldX(e.clientX));
+});
+
+canvas.addEventListener("pointermove", (e) => {
+  // PCはホバーで狙いを合わせ、スマホはドラッグで合わせる
+  if (game.state !== State.PLAYING) return;
+  if (e.pointerType === "mouse" || pointerActive) {
+    aimTo(clientXToWorldX(e.clientX));
+  }
+});
+
+canvas.addEventListener("pointerup", (e) => {
+  e.preventDefault();
+  if (pointerActive) {
+    aimTo(clientXToWorldX(e.clientX));
+    dropBall();
+  }
+  pointerActive = false;
+});
+
+canvas.addEventListener("pointercancel", () => {
+  pointerActive = false;
 });
 
 ui.el.startBtn.addEventListener("click", startGame);
@@ -318,6 +326,5 @@ function disposeGroup(group) {
 }
 
 // ===== 起動 =====
-ui.setControlsEnabled(false);
 game.lastTime = performance.now();
 requestAnimationFrame(update);

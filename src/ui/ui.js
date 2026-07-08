@@ -11,9 +11,7 @@ export function createUI() {
     resultRank: document.getElementById("result-rank"),
     startBtn: document.getElementById("start-btn"),
     restartBtn: document.getElementById("restart-btn"),
-    leftBtn: document.getElementById("left-btn"),
-    rightBtn: document.getElementById("right-btn"),
-    dropBtn: document.getElementById("drop-btn"),
+    hint: document.getElementById("hint"),
   };
 
   return {
@@ -42,13 +40,11 @@ export function createUI() {
     hideGameOver() {
       el.gameoverOverlay.classList.add("hidden");
     },
-    setControlsEnabled(enabled) {
-      el.leftBtn.disabled = !enabled;
-      el.rightBtn.disabled = !enabled;
-      el.dropBtn.disabled = !enabled;
+    showHint() {
+      el.hint.classList.remove("hidden");
     },
-    setDropEnabled(enabled) {
-      el.dropBtn.disabled = !enabled;
+    hideHint() {
+      el.hint.classList.add("hidden");
     },
   };
 }
