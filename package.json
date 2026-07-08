@@ -1,0 +1,19 @@
+{
+  "name": "genso-korokoro-tower",
+  "version": "0.1.0",
+  "description": "幻想ころころタワー - 東方Project二次創作の3D積み上げゲーム (MVP)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

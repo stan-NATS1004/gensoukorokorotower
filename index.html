@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#aee3ff" />
+    <title>幻想ころころタワー</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- 上部: タイトルとスコア -->
+      <header id="hud-top">
+        <div class="title-row">
+          <h1 class="game-title">幻想ころころタワー</h1>
+        </div>
+        <div class="score-row">
+          <div class="score-box">
+            <span class="score-label">スコア</span>
+            <span id="score-value" class="score-num">0</span>
+          </div>
+          <div class="next-box">
+            <span class="score-label">つぎ</span>
+            <span id="next-preview" class="next-dot"></span>
+          </div>
+          <div class="score-box">
+            <span class="score-label">さいこう</span>
+            <span id="highscore-value" class="score-num">0</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- 中央: 3Dゲーム画面 -->
+      <main id="game-area">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- ゲームオーバー画面 -->
+        <div id="gameover-overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h2 class="overlay-title">ゲームオーバー</h2>
+            <div class="result-row">
+              <span>スコア</span>
+              <span id="result-score" class="result-num">0</span>
+            </div>
+            <div class="result-row">
+              <span>さいこうスコア</span>
+              <span id="result-highscore" class="result-num">0</span>
+            </div>
+            <div class="rank-row">
+              <span class="rank-label">ランク</span>
+              <span id="result-rank" class="rank-name">チルノ級</span>
+            </div>
+            <button id="restart-btn" class="btn btn-restart">もう一度あそぶ</button>
+          </div>
+        </div>
+
+        <!-- スタート画面 -->
+        <div id="start-overlay" class="overlay">
+          <div class="overlay-card">
+            <h2 class="overlay-title">幻想ころころタワー</h2>
+            <p class="start-text">
+              たまを左右にうごかして<br />タイミングよく落とそう！<br />崩さずどこまで積めるかな？
+            </p>
+            <button id="start-btn" class="btn btn-start">スタート</button>
+            <p class="fan-note">
+              東方Projectを題材にした二次創作ファンゲームです。<br />
+              公式作品ではありません。
+            </p>
+          </div>
+        </div>
+      </main>
+
+      <!-- 下部: 操作ボタン -->
+      <footer id="hud-bottom">
+        <button id="left-btn" class="btn btn-move" aria-label="左へ">◀</button>
+        <button id="drop-btn" class="btn btn-drop" aria-label="落とす">おとす</button>
+        <button id="right-btn" class="btn btn-move" aria-label="右へ">▶</button>
+      </footer>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

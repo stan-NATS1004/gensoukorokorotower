@@ -1,0 +1,310 @@
+:root {
+  /* 9:16 のゲーム枠。PCでは最大幅430px */
+  --frame-max-width: 430px;
+  --hud-top-h: 84px;
+  --hud-bottom-h: 116px;
+  --accent: #ff8fb1;
+  --accent-dark: #e85d8a;
+  --sky-top: #bfe9ff;
+  --sky-bottom: #eafff2;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #7fc4e8;
+  font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", system-ui,
+    sans-serif;
+  color: #33475b;
+  touch-action: manipulation;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  max-width: var(--frame-max-width);
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== 上部HUD ===== */
+#hud-top {
+  flex: 0 0 auto;
+  height: var(--hud-top-h);
+  padding: 8px 12px calc(env(safe-area-inset-top, 0px) + 4px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 5;
+}
+
+.title-row {
+  display: flex;
+  justify-content: center;
+}
+
+.game-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ff6b9d;
+  text-shadow: 0 2px 0 #fff, 0 3px 6px rgba(255, 107, 157, 0.25);
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.score-box,
+.next-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 4px 10px;
+  min-width: 74px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.score-label {
+  font-size: 11px;
+  color: #7b8794;
+  font-weight: 700;
+}
+
+.score-num {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #33475b;
+}
+
+.next-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ccc;
+  margin-top: 2px;
+  box-shadow: inset 0 -3px 4px rgba(0, 0, 0, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== 中央ゲームエリア ===== */
+#game-area {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* ===== オーバーレイ ===== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(40, 60, 80, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-card {
+  width: 100%;
+  max-width: 300px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 22px 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: pop 0.25s ease;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.overlay-title {
+  margin: 0 0 12px;
+  font-size: 24px;
+  color: #ff6b9d;
+}
+
+.start-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #5a6b7b;
+  margin: 6px 0 16px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 15px;
+  color: #5a6b7b;
+  padding: 4px 6px;
+  border-bottom: 1px dashed #e0e6ec;
+}
+
+.result-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #33475b;
+}
+
+.rank-row {
+  margin: 14px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rank-label {
+  font-size: 12px;
+  color: #7b8794;
+}
+
+.rank-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ff8f3f;
+}
+
+.fan-note {
+  margin: 16px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #9aa7b3;
+}
+
+/* ===== ボタン ===== */
+.btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.06s ease, filter 0.06s ease;
+}
+
+.btn:active {
+  transform: translateY(2px) scale(0.98);
+  filter: brightness(0.95);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  cursor: default;
+}
+
+.btn-start,
+.btn-restart {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background: linear-gradient(180deg, #ff9ec2, var(--accent-dark));
+  box-shadow: 0 4px 0 #c94b76;
+  margin-top: 6px;
+}
+
+.btn-start:active,
+.btn-restart:active {
+  box-shadow: 0 2px 0 #c94b76;
+}
+
+/* ===== 下部HUD ===== */
+#hud-bottom {
+  flex: 0 0 auto;
+  height: var(--hud-bottom-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  z-index: 5;
+}
+
+.btn-move {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  font-size: 28px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #8fd3ff, #4aa8e8);
+  box-shadow: 0 4px 0 #3488c4;
+}
+
+.btn-move:active {
+  box-shadow: 0 2px 0 #3488c4;
+}
+
+.btn-drop {
+  flex: 1 1 auto;
+  max-width: 180px;
+  height: 72px;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #ffd36b, #ff9f2e);
+  box-shadow: 0 4px 0 #e07f18;
+}
+
+.btn-drop:active {
+  box-shadow: 0 2px 0 #e07f18;
+}
+
+/* 高さが低い端末向けの微調整 */
+@media (max-height: 640px) {
+  :root {
+    --hud-top-h: 74px;
+    --hud-bottom-h: 100px;
+  }
+  .btn-move {
+    width: 62px;
+    height: 62px;
+  }
+  .btn-drop {
+    height: 62px;
+  }
+}
