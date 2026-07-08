@@ -23,11 +23,11 @@
             <span id="score-value" class="score-num">0</span>
           </div>
           <div class="next-box">
-            <span class="score-label">つぎ</span>
+            <span class="score-label">次の玉</span>
             <span id="next-preview" class="next-dot"></span>
           </div>
           <div class="score-box">
-            <span class="score-label">さいこう</span>
+            <span class="score-label">最高</span>
             <span id="highscore-value" class="score-num">0</span>
           </div>
         </div>
@@ -42,17 +42,17 @@
           上から見る
         </button>
 
-        <!-- あぶない警告（ラインを超えている間のカウントダウン） -->
+        <!-- 危険警告（ラインを超えている間のカウントダウン） -->
         <div id="danger" class="danger hidden">
-          <span class="danger-title">あぶない！</span>
-          <span class="danger-sub">あと <span id="danger-sec">2</span> びょうで おわり</span>
+          <span class="danger-title">危ない！</span>
+          <span class="danger-sub">あと <span id="danger-sec">2</span> 秒で終了</span>
         </div>
 
         <!-- ゲームオーバー画面 -->
         <div id="gameover-overlay" class="overlay hidden">
           <div class="overlay-card">
             <h2 class="overlay-title">ゲームオーバー</h2>
-            <p class="gameover-reason">たまが あかいラインを こえたよ</p>
+            <p class="gameover-reason">玉が赤い線をこえました</p>
             <div class="result-row">
               <span>スコア</span>
               <span id="result-score" class="result-num">0</span>
@@ -65,7 +65,7 @@
               <span class="rank-label">ランク</span>
               <span id="result-rank" class="rank-name">チルノ級</span>
             </div>
-            <button id="restart-btn" class="btn btn-restart">もう一度あそぶ</button>
+            <button id="restart-btn" class="btn btn-restart">もう一度遊ぶ</button>
           </div>
         </div>
 
@@ -74,14 +74,15 @@
           <div class="overlay-card">
             <h2 class="overlay-title">幻想ころころタワー</h2>
             <div class="rules">
-              <p class="rules-goal">🎯 めあて：たまを たくさん つもう！</p>
+              <p class="rules-goal">🎯 目標：赤い線にとどく前に、玉をたくさん積もう！</p>
               <ul class="rules-list">
-                <li>画面をタップした ばしょに たまが おちる</li>
-                <li>「上から見る」で 前後の ばしょも えらべる</li>
-                <li>つんだ かずが スコア。10こごとに ランクアップ！</li>
+                <li>画面をタップした場所に玉が落ちます（左右どこでもOK）</li>
+                <li>「上から見る」に切り替えると、奥・手前の位置もねらえます</li>
+                <li>積んだ数がそのままスコア。10個ごとにランクアップ！</li>
               </ul>
               <p class="rules-lose">
-                ⚠️ たまが <b>あかいライン</b>を こえて<br />2びょう たったら おわり
+                ⚠️ 積んだ玉が<b>赤い線</b>を2秒こえたら終了。<br />
+                「勝ち」はなく、どこまで積めるか挑戦するゲームです。
               </p>
             </div>
             <button id="start-btn" class="btn btn-start">スタート</button>

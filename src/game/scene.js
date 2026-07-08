@@ -140,6 +140,19 @@ export function createScene(canvas) {
   targetRing.position.set(0, STAGE.floorY + 0.03, 0);
   scene.add(targetRing);
 
+  // --- 落下ガイド（待機玉から床の目標まで結ぶ縦線） ---
+  const guideHeight = STAGE.spawnY;
+  const dropGuide = new THREE.Mesh(
+    new THREE.BoxGeometry(0.05, guideHeight, 0.05),
+    new THREE.MeshBasicMaterial({
+      color: "#ff5b8f",
+      transparent: true,
+      opacity: 0.4,
+    })
+  );
+  dropGuide.position.set(0, STAGE.floorY + guideHeight / 2, 0);
+  scene.add(dropGuide);
+
   function doResize() {
     resize(renderer, camera, canvas, VIEWS[state.mode].fit);
   }
@@ -152,6 +165,7 @@ export function createScene(canvas) {
     scene,
     camera,
     target: targetRing,
+    dropGuide,
     viewTop,
     viewBottom,
     getViewMode: () => state.mode,

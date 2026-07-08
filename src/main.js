@@ -67,10 +67,18 @@ function prepareWaitingBall() {
   ui.setNextPreview(game.nextCharacter.color);
 }
 
-// 床の落下目標マーカーを (x, z) に動かす
+// 床の落下目標マーカーと落下ガイドを (x, z) に動かす
 function updateTarget(x, z) {
   view.target.position.x = x;
   view.target.position.z = z;
+  view.dropGuide.position.x = x;
+  view.dropGuide.position.z = z;
+}
+
+// 目標マーカー・ガイドの表示切り替え
+function setAimVisible(visible) {
+  view.target.visible = visible;
+  view.dropGuide.visible = visible;
 }
 
 // ===== 待機球の移動（キーボード用） =====
@@ -229,6 +237,7 @@ function triggerGameOver() {
   game.canDrop = false;
   ui.hideHint();
   ui.hideDanger();
+  setAimVisible(false);
 
   // 待機球を消す
   if (game.waitingBall) {
@@ -266,6 +275,7 @@ function startGame() {
   ui.hideDanger();
   updateHintForView();
   ui.showHint();
+  setAimVisible(true);
   prepareWaitingBall();
 }
 
@@ -420,6 +430,7 @@ function disposeGroup(group) {
 
 // ===== 起動 =====
 ui.setViewLabel(view.getViewMode());
+setAimVisible(false);
 game.lastTime = performance.now();
 rafId = requestAnimationFrame(update);
 
