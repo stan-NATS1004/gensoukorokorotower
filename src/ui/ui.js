@@ -11,7 +11,10 @@ export function createUI() {
     resultRank: document.getElementById("result-rank"),
     startBtn: document.getElementById("start-btn"),
     restartBtn: document.getElementById("restart-btn"),
+    viewBtn: document.getElementById("view-btn"),
     hint: document.getElementById("hint"),
+    danger: document.getElementById("danger"),
+    dangerSec: document.getElementById("danger-sec"),
   };
 
   return {
@@ -45,6 +48,20 @@ export function createUI() {
     },
     hideHint() {
       el.hint.classList.add("hidden");
+    },
+    setViewLabel(mode) {
+      // 現在の視点に対して「切り替え先」をラベルに出す
+      el.viewBtn.textContent = mode === "side" ? "上から見る" : "横から見る";
+    },
+    setHintText(text) {
+      el.hint.textContent = text;
+    },
+    showDanger(sec) {
+      el.dangerSec.textContent = String(sec);
+      el.danger.classList.remove("hidden");
+    },
+    hideDanger() {
+      el.danger.classList.add("hidden");
     },
   };
 }

@@ -12,7 +12,9 @@ export const STAGE = {
   spawnY: 6.2, // 球の出現位置 y
   moveMinX: -1.5, // 落下位置の移動範囲 左
   moveMaxX: 1.5, // 落下位置の移動範囲 右
-  moveStep: 0.2, // 左右ボタン1回の移動量
+  moveMinZ: -0.7, // 落下位置の移動範囲 奥
+  moveMaxZ: 0.7, // 落下位置の移動範囲 手前
+  moveStep: 0.2, // キーボード1回の移動量
 };
 
 export const PHYSICS = {
@@ -28,9 +30,6 @@ export const PHYSICS = {
   linearDamping: 0.25,
   angularDamping: 0.55,
 };
-
-// 落下時に奥行き方向へ少しばらつかせて立体的な山にする（±値）
-export const SPAWN_Z_JITTER = 0.32;
 
 export const RULES = {
   dropCooldownMs: 800, // 落下後、次の球を落とせない時間

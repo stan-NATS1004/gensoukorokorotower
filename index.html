@@ -37,10 +37,22 @@
       <main id="game-area">
         <canvas id="game-canvas"></canvas>
 
+        <!-- 視点切り替えボタン -->
+        <button id="view-btn" class="view-btn" aria-label="視点を切り替える">
+          上から見る
+        </button>
+
+        <!-- あぶない警告（ラインを超えている間のカウントダウン） -->
+        <div id="danger" class="danger hidden">
+          <span class="danger-title">あぶない！</span>
+          <span class="danger-sub">あと <span id="danger-sec">2</span> びょうで おわり</span>
+        </div>
+
         <!-- ゲームオーバー画面 -->
         <div id="gameover-overlay" class="overlay hidden">
           <div class="overlay-card">
             <h2 class="overlay-title">ゲームオーバー</h2>
+            <p class="gameover-reason">たまが あかいラインを こえたよ</p>
             <div class="result-row">
               <span>スコア</span>
               <span id="result-score" class="result-num">0</span>
@@ -61,9 +73,17 @@
         <div id="start-overlay" class="overlay">
           <div class="overlay-card">
             <h2 class="overlay-title">幻想ころころタワー</h2>
-            <p class="start-text">
-              たまを左右にうごかして<br />タイミングよく落とそう！<br />崩さずどこまで積めるかな？
-            </p>
+            <div class="rules">
+              <p class="rules-goal">🎯 めあて：たまを たくさん つもう！</p>
+              <ul class="rules-list">
+                <li>画面をタップした ばしょに たまが おちる</li>
+                <li>「上から見る」で 前後の ばしょも えらべる</li>
+                <li>つんだ かずが スコア。10こごとに ランクアップ！</li>
+              </ul>
+              <p class="rules-lose">
+                ⚠️ たまが <b>あかいライン</b>を こえて<br />2びょう たったら おわり
+              </p>
+            </div>
             <button id="start-btn" class="btn btn-start">スタート</button>
             <p class="fan-note">
               東方Projectを題材にした二次創作ファンゲームです。<br />

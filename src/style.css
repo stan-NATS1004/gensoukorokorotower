@@ -122,6 +122,31 @@ body {
   cursor: pointer;
 }
 
+/* ===== 視点切り替えボタン ===== */
+.view-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 6;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #9be7c4, #38b98a);
+  box-shadow: 0 3px 0 #2a916b;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.view-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #2a916b;
+}
+
 /* ===== 操作ヒント ===== */
 .hint {
   position: absolute;
@@ -204,6 +229,101 @@ body {
   line-height: 1.7;
   color: #5a6b7b;
   margin: 6px 0 16px;
+}
+
+/* ===== あそびかた（スタート画面） ===== */
+.rules {
+  text-align: left;
+  margin: 4px 0 14px;
+}
+
+.rules-goal {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #33475b;
+  text-align: center;
+}
+
+.rules-list {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #5a6b7b;
+}
+
+.rules-list li {
+  margin-bottom: 3px;
+}
+
+.rules-lose {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: center;
+  color: #d6455f;
+  background: #fff0f3;
+  border-radius: 12px;
+}
+
+.rules-lose b {
+  color: #e02a4c;
+}
+
+.gameover-reason {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #d6455f;
+}
+
+/* ===== あぶない警告 ===== */
+.danger {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 20px;
+  background: rgba(224, 42, 76, 0.92);
+  color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(224, 42, 76, 0.45);
+  animation: dangerBlink 0.6s ease-in-out infinite;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.danger.hidden {
+  display: none;
+}
+
+.danger-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.danger-sub {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@keyframes dangerBlink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.72;
+    transform: translateX(-50%) scale(1.04);
+  }
 }
 
 .result-row {

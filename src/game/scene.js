@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import { STAGE } from "./config.js";
 
-// Three.js のシーン・カメラ・ライト・床・壁・ガイド・ゲームオーバーラインを構築する。
-// カメラは固定の OrthographicCamera（正面やや上から見下ろす）。
+// Three.js のシーン・カメラ・ライト・床・壁・目標マーカー・ゲームオーバーラインを構築する。
+// カメラは2つの視点を切り替えられる:
+//   - "side": 斜め見下ろし（タワーの高さが見える）
+//   - "top" : 真上から見下ろす（床の前後・左右の置き場所が見える）
 export function createScene(canvas) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -16,31 +18,53 @@ export function createScene(canvas) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#bfe9ff");
 
-  // --- カメラ（Orthographic） ---
-  // 表示したい縦範囲（床の少し下〜出現位置の少し上）を基準に frustum を決める。
+  // 表示範囲の基準
   const viewTop = STAGE.spawnY + 0.6;
   const viewBottom = STAGE.floorY - 0.8;
   const midY = (viewTop + viewBottom) / 2;
-  // 斜め見下ろし用の frustum 高さ（傾けた分、奥行きが縦に映るので少し広げる）
-  const frustumHeight = (viewTop - viewBottom) * 1.18;
+
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
-  // x軸まわりにだけ傾けることで、左右(x)は画面横方向のまま＝クリック位置の対応が崩れない
-  camera.position.set(0, midY + 5.4, 11);
-  camera.lookAt(0, midY - 0.6, 0);
+
+  // 視点ごとのカメラ設定と frustum の合わせ方
+  const VIEWS = {
+    side: {
+      pos: [0, midY + 5.4, 11],
+      look: [0, midY - 0.6, 0],
+      up: [0, 1, 0],
+      fit: { mode: "height", value: (viewTop - viewBottom) * 1.18 },
+    },
+    top: {
+      pos: [0, 18, 0.0001],
+      look: [0, 0, 0],
+      up: [0, 0, -1],
+      fit: { mode: "width", value: STAGE.width + 1.0 },
+    },
+  };
+
+  const state = { mode: "side" };
+
+  function setView(mode) {
+    const v = VIEWS[mode] || VIEWS.side;
+    state.mode = VIEWS[mode] ? mode : "side";
+    camera.up.set(v.up[0], v.up[1], v.up[2]);
+    camera.position.set(v.pos[0], v.pos[1], v.pos[2]);
+    camera.lookAt(v.look[0], v.look[1], v.look[2]);
+    doResize();
+  }
 
   // --- ライト ---
   const ambient = new THREE.AmbientLight(0xffffff, 0.75);
   scene.add(ambient);
   const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(3, 10, 6);
+  dir.position.set(3, 12, 6);
   dir.castShadow = true;
   dir.shadow.mapSize.set(1024, 1024);
   dir.shadow.camera.near = 1;
-  dir.shadow.camera.far = 30;
+  dir.shadow.camera.far = 40;
   dir.shadow.camera.left = -4;
   dir.shadow.camera.right = 4;
   dir.shadow.camera.top = 8;
-  dir.shadow.camera.bottom = -2;
+  dir.shadow.camera.bottom = -4;
   scene.add(dir);
 
   // --- 床 ---
@@ -50,6 +74,19 @@ export function createScene(canvas) {
   floor.position.set(0, STAGE.floorY - 0.2, 0);
   floor.receiveShadow = true;
   scene.add(floor);
+
+  // 床の上面に薄いマス目（真上視点で前後左右が分かりやすいように）
+  const grid = new THREE.GridHelper(
+    Math.max(STAGE.width, STAGE.depth),
+    8,
+    0xffffff,
+    0xffffff
+  );
+  grid.scale.set(STAGE.width / Math.max(STAGE.width, STAGE.depth), 1, STAGE.depth / Math.max(STAGE.width, STAGE.depth));
+  grid.position.set(0, STAGE.floorY + 0.01, 0);
+  grid.material.opacity = 0.25;
+  grid.material.transparent = true;
+  scene.add(grid);
 
   // --- 左右の壁（薄い色・半透明） ---
   const wallHeight = STAGE.spawnY + 1.5;
@@ -74,57 +111,73 @@ export function createScene(canvas) {
     transparent: true,
     opacity: 0.5,
   });
-  const lineGeo = new THREE.BoxGeometry(STAGE.width + 0.4, 0.04, 0.02);
+  const lineGeo = new THREE.BoxGeometry(STAGE.width + 0.4, 0.04, STAGE.depth);
   const overLine = new THREE.Mesh(lineGeo, lineMat);
-  overLine.position.set(0, STAGE.gameOverLine, STAGE.frontWall + 0.05);
+  overLine.position.set(0, STAGE.gameOverLine, 0);
+  overLine.material.opacity = 0.26;
   scene.add(overLine);
 
-  // 破線風の点を並べてラインを目立たせる
   const dashGroup = new THREE.Group();
   const dashMat = new THREE.MeshBasicMaterial({ color: "#ff8fa3" });
   for (let x = -1.8; x <= 1.8; x += 0.3) {
-    const dash = new THREE.Mesh(
-      new THREE.BoxGeometry(0.16, 0.06, 0.02),
-      dashMat
-    );
+    const dash = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, 0.02), dashMat);
     dash.position.set(x, STAGE.gameOverLine, STAGE.frontWall + 0.06);
     dashGroup.add(dash);
   }
   scene.add(dashGroup);
 
-  // --- 落下位置ガイド（縦の薄い線） ---
-  const guideMat = new THREE.MeshBasicMaterial({
-    color: "#ffffff",
-    transparent: true,
-    opacity: 0.45,
-  });
-  const guide = new THREE.Mesh(
-    new THREE.BoxGeometry(0.04, STAGE.spawnY, 0.02),
-    guideMat
+  // --- 落下目標マーカー（床に置くリング） ---
+  const targetRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.28, 0.4, 28),
+    new THREE.MeshBasicMaterial({
+      color: "#ff5b8f",
+      transparent: true,
+      opacity: 0.85,
+      side: THREE.DoubleSide,
+    })
   );
-  guide.position.set(0, STAGE.spawnY / 2, STAGE.frontWall + 0.04);
-  scene.add(guide);
+  targetRing.rotation.x = -Math.PI / 2;
+  targetRing.position.set(0, STAGE.floorY + 0.03, 0);
+  scene.add(targetRing);
+
+  function doResize() {
+    resize(renderer, camera, canvas, VIEWS[state.mode].fit);
+  }
+
+  // 初期視点
+  setView("side");
 
   return {
     renderer,
     scene,
     camera,
-    guide,
+    target: targetRing,
     viewTop,
     viewBottom,
-    resize: () => resize(renderer, camera, canvas, frustumHeight),
+    getViewMode: () => state.mode,
+    setView,
+    toggleView: () => setView(state.mode === "side" ? "top" : "side"),
+    resize: doResize,
   };
 }
 
 // キャンバスのアスペクト比に合わせて Orthographic frustum を更新する。
-function resize(renderer, camera, canvas, frustumHeight) {
+// fit.mode が "width" のときは横幅基準、"height" のときは縦基準で合わせる。
+function resize(renderer, camera, canvas, fit) {
   const w = canvas.clientWidth || 1;
   const h = canvas.clientHeight || 1;
   renderer.setSize(w, h, false);
 
   const aspect = w / h;
-  const halfH = frustumHeight / 2;
-  const halfW = halfH * aspect;
+  let halfW;
+  let halfH;
+  if (fit.mode === "width") {
+    halfW = fit.value / 2;
+    halfH = halfW / aspect;
+  } else {
+    halfH = fit.value / 2;
+    halfW = halfH * aspect;
+  }
 
   camera.top = halfH;
   camera.bottom = -halfH;

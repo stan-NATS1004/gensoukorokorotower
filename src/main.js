@@ -4,7 +4,6 @@ import {
   STAGE,
   PHYSICS,
   RULES,
-  SPAWN_Z_JITTER,
   getRank,
   STORAGE_KEYS,
 } from "./game/config.js";
@@ -19,6 +18,11 @@ const ui = createUI();
 
 const view = createScene(canvas);
 const physics = createPhysics();
+
+// すべてのイベント登録をまとめて解除できるようにする（HMRでの多重登録防止）
+const listenerAC = new AbortController();
+const listenerOpts = { signal: listenerAC.signal };
+let rafId = 0;
 
 // ===== ゲーム状態 =====
 const State = {
@@ -44,7 +48,7 @@ ui.setHighScore(game.highScore);
 function resizeAll() {
   view.resize();
 }
-window.addEventListener("resize", resizeAll);
+window.addEventListener("resize", resizeAll, listenerOpts);
 resizeAll();
 
 // ===== 待機球の準備 =====
@@ -54,41 +58,53 @@ function prepareWaitingBall() {
 
   const group = createBallMesh(character);
   const x = 0;
-  // 奥行き方向に少しばらつかせて立体的な山にする
-  const z = (Math.random() * 2 - 1) * SPAWN_Z_JITTER;
+  const z = 0;
   group.position.set(x, STAGE.spawnY, z);
   view.scene.add(group);
 
   game.waitingBall = { group, character, x, z };
-  updateGuide(x);
+  updateTarget(x, z);
   ui.setNextPreview(game.nextCharacter.color);
 }
 
-function updateGuide(x) {
-  view.guide.position.x = x;
+// 床の落下目標マーカーを (x, z) に動かす
+function updateTarget(x, z) {
+  view.target.position.x = x;
+  view.target.position.z = z;
 }
 
-// ===== 待機球の左右移動（キーボード用） =====
-function moveWaiting(dir) {
+// ===== 待機球の移動（キーボード用） =====
+function moveWaiting(dx, dz) {
   if (game.state !== State.PLAYING || !game.waitingBall) return;
-  aimTo(game.waitingBall.x + dir * STAGE.moveStep);
+  aimTo(game.waitingBall.x + dx * STAGE.moveStep, game.waitingBall.z + dz * STAGE.moveStep);
 }
 
-// 待機球を指定x（ワールド座標）に合わせる
-function aimTo(worldX) {
+// 待機球を指定 (x, z)（ワールド座標）に合わせる。z は球の半径ぶん内側に制限。
+function aimTo(worldX, worldZ) {
   if (game.state !== State.PLAYING || !game.waitingBall) return;
+  const r = game.waitingBall.character.radius;
   const nx = clamp(worldX, STAGE.moveMinX, STAGE.moveMaxX);
+  const zLimit = Math.max(0, STAGE.frontWall - r - 0.02);
+  const nz = clamp(worldZ, -zLimit, zLimit);
   game.waitingBall.x = nx;
+  game.waitingBall.z = nz;
   game.waitingBall.group.position.x = nx;
-  updateGuide(nx);
+  game.waitingBall.group.position.z = nz;
+  updateTarget(nx, nz);
 }
 
-// 画面上のx座標をワールドx座標へ変換する
-function clientXToWorldX(clientX) {
+// 画面上の座標を、床(y=0)平面上のワールド座標へ変換する（レイキャスト）。
+const _raycaster = new THREE.Raycaster();
+const _floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -STAGE.floorY);
+const _ndc = new THREE.Vector2();
+const _hit = new THREE.Vector3();
+function clientToFloor(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
-  const frac = (clientX - rect.left) / rect.width;
-  const worldWidth = view.camera.right - view.camera.left;
-  return view.camera.left + frac * worldWidth;
+  _ndc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  _ndc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  _raycaster.setFromCamera(_ndc, view.camera);
+  const hit = _raycaster.ray.intersectPlane(_floorPlane, _hit);
+  return hit ? { x: _hit.x, z: _hit.z } : null;
 }
 
 // ===== 落下 =====
@@ -149,7 +165,7 @@ function update(now) {
   }
 
   view.renderer.render(view.scene, view.camera);
-  requestAnimationFrame(update);
+  rafId = requestAnimationFrame(update);
 }
 
 function syncBalls(now) {
@@ -175,6 +191,8 @@ function removeBall(index) {
 
 // ===== ゲームオーバー判定 =====
 function checkGameOver(now) {
+  let longestOverMs = -1; // ライン超過中の最長経過時間
+
   for (const ball of game.balls) {
     // 落下直後の球は判定対象にしない
     if (now - ball.dropTime < RULES.judgeDelayMs) {
@@ -184,14 +202,24 @@ function checkGameOver(now) {
     const topY = ball.body.position.y + ball.radius;
     if (topY > STAGE.gameOverLine) {
       if (ball.overSince === null) ball.overSince = now;
-      if (now - ball.overSince >= RULES.gameOverGraceMs) {
+      const elapsed = now - ball.overSince;
+      if (elapsed >= RULES.gameOverGraceMs) {
         triggerGameOver();
         return;
       }
+      longestOverMs = Math.max(longestOverMs, elapsed);
     } else {
       // ライン下に戻ったらカウントリセット
       ball.overSince = null;
     }
+  }
+
+  // 超過中なら「あぶない！あとN秒」を表示、そうでなければ隠す
+  if (longestOverMs >= 0) {
+    const remain = Math.max(0, RULES.gameOverGraceMs - longestOverMs);
+    ui.showDanger(Math.ceil(remain / 1000));
+  } else {
+    ui.hideDanger();
   }
 }
 
@@ -200,6 +228,7 @@ function triggerGameOver() {
   game.state = State.GAMEOVER;
   game.canDrop = false;
   ui.hideHint();
+  ui.hideDanger();
 
   // 待機球を消す
   if (game.waitingBall) {
@@ -234,6 +263,8 @@ function startGame() {
   ui.setScore(0);
   ui.hideStart();
   ui.hideGameOver();
+  ui.hideDanger();
+  updateHintForView();
   ui.showHint();
   prepareWaitingBall();
 }
@@ -259,50 +290,97 @@ function saveResult(score, highScore, rank) {
 }
 
 // ===== 入力（画面クリック / タップ） =====
-// 画面上でポインタを動かすと待機球が横に移動し、
+// 画面上でポインタを動かすと待機球が「床のその位置(x,z)」へ移動し、
 // クリック / タップで球を落とす（PC・スマホ共通）。
+// 斜め視点でも真上視点でも、床平面へのレイキャストで位置が決まる。
 let pointerActive = false;
 
-canvas.addEventListener("pointerdown", (e) => {
-  e.preventDefault();
-  pointerActive = true;
-  aimTo(clientXToWorldX(e.clientX));
-});
+function aimFromEvent(e) {
+  const p = clientToFloor(e.clientX, e.clientY);
+  if (p) aimTo(p.x, p.z);
+}
 
-canvas.addEventListener("pointermove", (e) => {
-  // PCはホバーで狙いを合わせ、スマホはドラッグで合わせる
-  if (game.state !== State.PLAYING) return;
-  if (e.pointerType === "mouse" || pointerActive) {
-    aimTo(clientXToWorldX(e.clientX));
-  }
-});
+canvas.addEventListener(
+  "pointerdown",
+  (e) => {
+    e.preventDefault();
+    pointerActive = true;
+    aimFromEvent(e);
+  },
+  listenerOpts
+);
 
-canvas.addEventListener("pointerup", (e) => {
-  e.preventDefault();
-  if (pointerActive) {
-    aimTo(clientXToWorldX(e.clientX));
-    dropBall();
-  }
-  pointerActive = false;
-});
+canvas.addEventListener(
+  "pointermove",
+  (e) => {
+    if (game.state !== State.PLAYING) return;
+    // PCはホバーで狙いを合わせ、スマホはドラッグで合わせる
+    if (e.pointerType === "mouse" || pointerActive) aimFromEvent(e);
+  },
+  listenerOpts
+);
 
-canvas.addEventListener("pointercancel", () => {
-  pointerActive = false;
-});
+canvas.addEventListener(
+  "pointerup",
+  (e) => {
+    e.preventDefault();
+    if (pointerActive) {
+      aimFromEvent(e);
+      dropBall();
+    }
+    pointerActive = false;
+  },
+  listenerOpts
+);
 
-ui.el.startBtn.addEventListener("click", startGame);
-ui.el.restartBtn.addEventListener("click", startGame);
+canvas.addEventListener(
+  "pointercancel",
+  () => {
+    pointerActive = false;
+  },
+  listenerOpts
+);
+
+// 視点切り替え
+ui.el.viewBtn.addEventListener(
+  "click",
+  () => {
+    view.toggleView();
+    ui.setViewLabel(view.getViewMode());
+    updateHintForView();
+  },
+  listenerOpts
+);
+
+ui.el.startBtn.addEventListener("click", startGame, listenerOpts);
+ui.el.restartBtn.addEventListener("click", startGame, listenerOpts);
+
+function updateHintForView() {
+  ui.setHintText(
+    view.getViewMode() === "top"
+      ? "床をタップして置く位置を決めよう"
+      : "画面をタップして落とそう"
+  );
+}
 
 // ===== 入力（キーボード） =====
 window.addEventListener("keydown", (e) => {
   switch (e.key) {
     case "ArrowLeft":
       e.preventDefault();
-      moveWaiting(-1);
+      moveWaiting(-1, 0);
       break;
     case "ArrowRight":
       e.preventDefault();
-      moveWaiting(1);
+      moveWaiting(1, 0);
+      break;
+    case "ArrowUp":
+      e.preventDefault();
+      moveWaiting(0, -1); // 奥へ
+      break;
+    case "ArrowDown":
+      e.preventDefault();
+      moveWaiting(0, 1); // 手前へ
       break;
     case " ":
     case "Spacebar":
@@ -314,10 +392,16 @@ window.addEventListener("keydown", (e) => {
     case "R":
       if (game.state !== State.READY) startGame();
       break;
+    case "v":
+    case "V":
+      view.toggleView();
+      ui.setViewLabel(view.getViewMode());
+      updateHintForView();
+      break;
     default:
       break;
   }
-});
+}, listenerOpts);
 
 // ===== ユーティリティ =====
 function clamp(v, min, max) {
@@ -335,5 +419,14 @@ function disposeGroup(group) {
 }
 
 // ===== 起動 =====
+ui.setViewLabel(view.getViewMode());
 game.lastTime = performance.now();
-requestAnimationFrame(update);
+rafId = requestAnimationFrame(update);
+
+// 開発時(HMR)に古いループ・イベント登録が残らないようにする（本番ビルドには影響なし）
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    cancelAnimationFrame(rafId);
+    listenerAC.abort();
+  });
+}
