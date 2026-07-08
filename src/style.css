@@ -1,7 +1,7 @@
 :root {
   /* 9:16 のゲーム枠。PCでは最大幅430px */
   --frame-max-width: 430px;
-  --hud-top-h: 84px;
+  --hud-top-h: 128px;
   --accent: #ff8fb1;
   --accent-dark: #e85d8a;
   --sky-top: #bfe9ff;
@@ -43,7 +43,7 @@ body {
 /* ===== 上部HUD ===== */
 #hud-top {
   flex: 0 0 auto;
-  height: var(--hud-top-h);
+  min-height: var(--hud-top-h);
   padding: 8px 12px calc(env(safe-area-inset-top, 0px) + 4px);
   display: flex;
   flex-direction: column;
@@ -360,6 +360,127 @@ body {
   color: #ff8f3f;
 }
 
+/* ===== ランク進捗（HUD） ===== */
+.rank-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 6px 12px 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.rank-steps,
+.rank-ladder {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* 段階をつなぐライン */
+.rank-steps::before,
+.rank-ladder::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 5px;
+  height: 3px;
+  background: rgba(123, 135, 148, 0.25);
+  border-radius: 2px;
+  z-index: 0;
+}
+
+.rank-step {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.rank-step-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #cdd6df;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(123, 135, 148, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.rank-step.done .rank-step-dot {
+  background: #ffbf7a;
+}
+
+.rank-step.current .rank-step-dot {
+  background: #ff8f3f;
+  transform: scale(1.55);
+  box-shadow: 0 0 0 3px rgba(255, 143, 63, 0.3);
+}
+
+.rank-step-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #9aa7b3;
+}
+
+.rank-step.done .rank-step-name {
+  color: #d98b4a;
+}
+
+.rank-step.current .rank-step-name {
+  color: #ff8f3f;
+  font-weight: 800;
+}
+
+.rank-progress {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #5b6b7b;
+}
+
+/* ===== ランクはしご（ゲームオーバー画面） ===== */
+.rank-ladder {
+  margin: 8px 0 2px;
+}
+
+.rank-ladder::before {
+  top: 6px;
+}
+
+.rank-ladder .rank-step-dot {
+  width: 13px;
+  height: 13px;
+}
+
+.rank-ladder .rank-step-name {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.rank-step-min {
+  font-size: 10px;
+  color: #9aa7b3;
+}
+
+.rank-here {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: #ff8f3f;
+  padding: 1px 7px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(255, 143, 63, 0.35);
+}
+
 .fan-note {
   margin: 16px 0 0;
   font-size: 10px;
@@ -409,6 +530,6 @@ body {
 /* 高さが低い端末向けの微調整 */
 @media (max-height: 640px) {
   :root {
-    --hud-top-h: 74px;
+    --hud-top-h: 112px;
   }
 }

@@ -31,6 +31,11 @@
             <span id="highscore-value" class="score-num">0</span>
           </div>
         </div>
+        <!-- ランク進捗（段階と現在地） -->
+        <div id="rank-strip" class="rank-strip">
+          <div id="rank-steps" class="rank-steps"></div>
+          <p id="rank-progress" class="rank-progress"></p>
+        </div>
       </header>
 
       <!-- 中央: 3Dゲーム画面 -->
@@ -65,6 +70,8 @@
               <span class="rank-label">ランク</span>
               <span id="result-rank" class="rank-name">チルノ級</span>
             </div>
+            <!-- 全ランクのはしご（今ココを表示） -->
+            <div id="result-rank-ladder" class="rank-ladder"></div>
             <button id="restart-btn" class="btn btn-restart">もう一度遊ぶ</button>
           </div>
         </div>

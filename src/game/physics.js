@@ -6,7 +6,11 @@ export function createPhysics() {
   const world = new CANNON.World({
     gravity: new CANNON.Vec3(0, PHYSICS.gravity, 0),
   });
-  world.broadphase = new CANNON.SAPBroadphase(world);
+  // SAPBroadphase はx軸ソートと反復ソルバーの相性で押し込み誤差が片側(左)に
+  // 蓄積し、多数積んだ球が左壁をすり抜けて消える不具合があった。
+  // NaiveBroadphase は左右対称に判定でき、球数(最大80)なら性能も問題ない。
+  world.broadphase = new CANNON.NaiveBroadphase();
+  world.solver.iterations = 20; // すり抜け防止のため反復回数を増やす
   world.allowSleep = true;
 
   // マテリアル定義

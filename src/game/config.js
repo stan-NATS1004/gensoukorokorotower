@@ -55,6 +55,27 @@ export function getRank(score) {
   return rank.name;
 }
 
+// 現在のランク段階・現在地・次のランクまでの残り数などをまとめて返す。
+export function getRankInfo(score) {
+  let index = 0;
+  for (let i = 0; i < RANKS.length; i++) {
+    if (score >= RANKS[i].min) index = i;
+  }
+  const current = RANKS[index];
+  const next = RANKS[index + 1] || null;
+  const isMax = !next;
+  const toNext = next ? next.min - score : 0;
+  return {
+    index,
+    name: current.name,
+    min: current.min,
+    total: RANKS.length,
+    next,
+    toNext,
+    isMax,
+  };
+}
+
 export const STORAGE_KEYS = {
   highScore: "gensoTowerHighScore",
   lastScore: "gensoTowerLastScore",

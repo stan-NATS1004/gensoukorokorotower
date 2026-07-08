@@ -43,6 +43,7 @@ const game = {
 };
 
 ui.setHighScore(game.highScore);
+ui.setRankProgress(0);
 
 // ===== 初期化 =====
 function resizeAll() {
