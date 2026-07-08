@@ -39,12 +39,15 @@ export const RULES = {
   outOfBoundsY: -5, // これより下に落ちた球は除去
 };
 
+// 必要数は物理シミュレーションで計測した収容数を基に設定。
+// 雑に落とすだけでは平均36・最大42個ほどで終わるため、
+// 咲夜級(40)以上は丁寧に積む必要があり、霊夢級(50)はほぼ満杯まで積む挑戦。
 export const RANKS = [
   { name: "チルノ級", min: 0 },
-  { name: "アリス級", min: 10 },
-  { name: "妖夢級", min: 20 },
-  { name: "咲夜級", min: 30 },
-  { name: "霊夢級", min: 40 },
+  { name: "アリス級", min: 15 },
+  { name: "妖夢級", min: 28 },
+  { name: "咲夜級", min: 40 },
+  { name: "霊夢級", min: 50 },
 ];
 
 export function getRank(score) {
