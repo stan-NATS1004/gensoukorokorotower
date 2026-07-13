@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#aee3ff" />
+    <title>幻想ころころタワー</title>
+    <script type="module" crossorigin src="./assets/index-BpFIN92i.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-ZCkHmVd8.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- 上部: タイトルとスコア -->
+      <header id="hud-top">
+        <div class="title-row">
+          <h1 class="game-title">幻想ころころタワー</h1>
+        </div>
+        <div class="score-row">
+          <div class="score-box">
+            <span class="score-label">スコア</span>
+            <span id="score-value" class="score-num">0</span>
+          </div>
+          <div class="next-box">
+            <span class="score-label">次の玉</span>
+            <span id="next-preview" class="next-dot"></span>
+          </div>
+          <div class="score-box">
+            <span class="score-label">最高</span>
+            <span id="highscore-value" class="score-num">0</span>
+          </div>
+        </div>
+        <!-- ランク進捗（段階と現在地） -->
+        <div id="rank-strip" class="rank-strip">
+          <div id="rank-steps" class="rank-steps"></div>
+          <p id="rank-progress" class="rank-progress"></p>
+        </div>
+      </header>
+
+      <!-- 中央: 3Dゲーム画面 -->
+      <main id="game-area">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 視点切り替えボタン -->
+        <button id="view-btn" class="view-btn" aria-label="視点を切り替える">
+          上から見る
+        </button>
+
+        <!-- 危険警告（ラインを超えている間のカウントダウン） -->
+        <div id="danger" class="danger hidden">
+          <span class="danger-title">危ない！</span>
+          <span class="danger-sub">あと <span id="danger-sec">2</span> 秒で終了</span>
+        </div>
+
+        <!-- ゲームオーバー画面 -->
+        <div id="gameover-overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h2 class="overlay-title">ゲームオーバー</h2>
+            <p class="gameover-reason">玉が赤い線をこえました</p>
+            <div class="result-row">
+              <span>スコア</span>
+              <span id="result-score" class="result-num">0</span>
+            </div>
+            <div class="result-row">
+              <span>さいこうスコア</span>
+              <span id="result-highscore" class="result-num">0</span>
+            </div>
+            <div class="rank-row">
+              <span class="rank-label">ランク</span>
+              <span id="result-rank" class="rank-name">チルノ級</span>
+            </div>
+            <!-- 全ランクのはしご（今ココを表示） -->
+            <div id="result-rank-ladder" class="rank-ladder"></div>
+            <button id="restart-btn" class="btn btn-restart">もう一度遊ぶ</button>
+          </div>
+        </div>
+
+        <!-- スタート画面 -->
+        <div id="start-overlay" class="overlay">
+          <div class="overlay-card">
+            <h2 class="overlay-title">幻想ころころタワー</h2>
+            <div class="rules">
+              <p class="rules-goal">🎯 目標：赤い線にとどく前に、玉をたくさん積もう！</p>
+              <ul class="rules-list">
+                <li>画面をタップした場所に玉が落ちます（左右どこでもOK）</li>
+                <li>「上から見る」に切り替えると、奥・手前の位置もねらえます</li>
+                <li>玉の大きさはバラバラ。積んだ数がスコアで、たくさん積むほど上のランクへ！</li>
+              </ul>
+              <p class="rules-lose">
+                ⚠️ 積んだ玉が<b>赤い線</b>をこえたら終了。<br />
+                線をこえるまでに、どれだけ沢山積めるか挑戦するゲームです。
+              </p>
+            </div>
+            <button id="start-btn" class="btn btn-start">スタート</button>
+            <p class="fan-note">
+              東方Projectを題材にした二次創作ファンゲームです。<br />
+              公式作品ではありません。
+            </p>
+          </div>
+        </div>
+        <!-- 操作ヒント -->
+        <div id="hint" class="hint hidden">画面をタップして落とそう</div>
+      </main>
+    </div>
+
+  </body>
+</html>
