@@ -53,9 +53,10 @@ export function createScene(canvas) {
   }
 
   // --- ライト ---
-  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+  // 色付き球の丸みが分かるよう、環境光は抑えめ・指向光を強めに
+  const ambient = new THREE.AmbientLight(0xffffff, 0.55);
   scene.add(ambient);
-  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  const dir = new THREE.DirectionalLight(0xffffff, 1.15);
   dir.position.set(3, 12, 6);
   dir.castShadow = true;
   dir.shadow.mapSize.set(1024, 1024);

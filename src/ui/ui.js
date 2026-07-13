@@ -80,8 +80,20 @@ export function createUI() {
     setHighScore(v) {
       el.highScoreValue.textContent = String(v);
     },
-    setNextPreview(color) {
-      el.nextPreview.style.background = color;
+    setNextPreview(character) {
+      // 正面スプライト画像があればそれを、なければ色の丸を表示
+      if (character && character.sprite) {
+        const url = `${import.meta.env.BASE_URL}images/characters/${character.sprite}`;
+        el.nextPreview.style.background = "transparent";
+        el.nextPreview.style.backgroundImage = `url("${url}")`;
+        el.nextPreview.style.backgroundSize = "contain";
+        el.nextPreview.style.backgroundRepeat = "no-repeat";
+        el.nextPreview.style.backgroundPosition = "center";
+        el.nextPreview.style.boxShadow = "none";
+      } else {
+        el.nextPreview.style.backgroundImage = "";
+        el.nextPreview.style.background = (character && character.color) || "#ccc";
+      }
     },
     showStart() {
       el.startOverlay.classList.remove("hidden");

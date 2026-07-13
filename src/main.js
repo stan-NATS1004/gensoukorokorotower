@@ -65,7 +65,7 @@ function prepareWaitingBall() {
 
   game.waitingBall = { group, character, x, z };
   updateTarget(x, z);
-  ui.setNextPreview(game.nextCharacter.color);
+  ui.setNextPreview(game.nextCharacter);
 }
 
 // 床の落下目標マーカーと落下ガイドを (x, z) に動かす

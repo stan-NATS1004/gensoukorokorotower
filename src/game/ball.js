@@ -2,11 +2,11 @@ import * as THREE from "three";
 
 // 生成した顔テクスチャのキャッシュ（キャラidごと）
 const faceTextureCache = new Map();
-const loadedTextureCache = new Map();
+const spriteTextureCache = new Map();
 const texLoader = new THREE.TextureLoader();
 
 // Canvasでシンプルなかわいい顔を描く（画像がない場合の代用）。
-function makeFaceTexture(color) {
+function makeFaceTexture() {
   const size = 256;
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -48,55 +48,63 @@ function makeFaceTexture(color) {
   return tex;
 }
 
-function getFaceTexture(character) {
+function getFallbackFaceTexture(character) {
   if (faceTextureCache.has(character.id)) {
     return faceTextureCache.get(character.id);
   }
-  const tex = makeFaceTexture(character.color);
+  const tex = makeFaceTexture();
   faceTextureCache.set(character.id, tex);
   return tex;
 }
 
-// texture が指定されていれば画像を読み込む。なければ null を返す。
-function getImageTexture(character) {
-  if (!character.texture) return null;
-  if (loadedTextureCache.has(character.texture)) {
-    return loadedTextureCache.get(character.texture);
+// 正面スプライト画像を読み込む（背景透過済みPNG想定）。
+function getSpriteTexture(character) {
+  if (!character.sprite) return null;
+  if (spriteTextureCache.has(character.sprite)) {
+    return spriteTextureCache.get(character.sprite);
   }
-  const url = `${import.meta.env.BASE_URL}images/characters/${character.texture}`;
+  const url = `${import.meta.env.BASE_URL}images/characters/${character.sprite}`;
   const tex = texLoader.load(url);
   tex.colorSpace = THREE.SRGBColorSpace;
-  loadedTextureCache.set(character.texture, tex);
+  tex.anisotropy = 8;
+  spriteTextureCache.set(character.sprite, tex);
   return tex;
 }
 
-// キャラ玉の見た目（球体 + 正面の顔ビルボード）を作る。
+// 第1段の見た目:
+//  - 立体的な色付き球体（光沢・陰影で丸みを出す）
+//  - その手前に、常にカメラ正面を向く2D顔スプライトを重ねる
 export function createBallMesh(character) {
   const group = new THREE.Group();
 
-  const geo = new THREE.SphereGeometry(character.radius, 24, 20);
-  const mat = new THREE.MeshStandardMaterial({
+  const geo = new THREE.SphereGeometry(character.radius, 32, 24);
+  const mat = new THREE.MeshPhysicalMaterial({
     color: character.color,
-    roughness: 0.55,
+    roughness: 0.35,
     metalness: 0.0,
+    clearcoat: 0.55,
+    clearcoatRoughness: 0.28,
   });
   const sphere = new THREE.Mesh(geo, mat);
   sphere.castShadow = true;
   sphere.receiveShadow = true;
   group.add(sphere);
 
-  // 顔ビルボード（常にカメラを向く Sprite）。
-  const faceTex = getImageTexture(character) || getFaceTexture(character);
+  const spriteTex = getSpriteTexture(character) || getFallbackFaceTexture(character);
   const spriteMat = new THREE.SpriteMaterial({
-    map: faceTex,
+    map: spriteTex,
     transparent: true,
+    depthTest: false, // 球の内側にいるので深度で隠れないようにする
     depthWrite: false,
+    opacity: 1,
   });
   const face = new THREE.Sprite(spriteMat);
-  const faceScale = character.radius * 1.7;
+  // 球の直径より少し小さめにして、縁の色付き球が見えるようにする
+  const faceScale = character.radius * 1.72;
   face.scale.set(faceScale, faceScale, faceScale);
-  // 球の少し手前に出して埋もれないようにする
-  face.position.set(0, 0, character.radius * 0.85);
+  // 中心に置く（親の回転で軌道しない）。Spriteは常にカメラ正面を向く
+  face.position.set(0, 0, 0);
+  face.renderOrder = 10;
   group.add(face);
 
   return group;
