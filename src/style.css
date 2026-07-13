@@ -1,5 +1,5 @@
 :root {
-  /* 9:16 のゲーム枠。PCでは最大幅430px */
+  /* PCではカード幅。スマホは枠いっぱい（max-width解除） */
   --frame-max-width: 430px;
   --hud-top-h: 128px;
   --accent: #ff8fb1;
@@ -531,5 +531,65 @@ body {
 @media (max-height: 640px) {
   :root {
     --hud-top-h: 112px;
+  }
+}
+
+/* スマホ: 画面幅いっぱい・余白少なめにしてプレイ領域を最大化 */
+@media (max-width: 600px) {
+  :root {
+    --frame-max-width: 100%;
+    --hud-top-h: 104px;
+  }
+
+  #app {
+    max-width: 100%;
+    width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  #hud-top {
+    padding: 6px 8px calc(env(safe-area-inset-top, 0px) + 2px);
+    gap: 4px;
+  }
+
+  .game-title {
+    font-size: 16px;
+  }
+
+  .score-box,
+  .next-box {
+    min-width: 64px;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+
+  .score-num {
+    font-size: 18px;
+  }
+
+  .next-dot {
+    width: 34px;
+    height: 34px;
+  }
+
+  .rank-strip {
+    padding: 4px 8px 3px;
+  }
+
+  .rank-step-name {
+    font-size: 9px;
+  }
+
+  .rank-progress {
+    font-size: 11px;
+  }
+
+  .overlay {
+    padding: 12px;
+  }
+
+  .overlay-card {
+    max-width: min(340px, 100%);
   }
 }
